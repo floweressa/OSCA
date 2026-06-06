@@ -535,7 +535,7 @@ tbody tr:hover { background: var(--surface-2); }
       <table id="mainTable">
         <thead>
           <tr>
-            <th style="width:44px">#</th>
+            <th style="width:44px">NO.</th>
             <th>Family Name</th>
             <th>First Name</th>
             <th>Middle Name</th>
@@ -565,6 +565,15 @@ let editIndex = -1;
   document.getElementById(id).addEventListener("input", function(){
     this.value = this.value.toUpperCase();
   });
+});
+
+// OSCA ID: auto-insert hyphen after "SC" → "SC-"
+document.getElementById("oscaId").addEventListener("input", function(){
+  const val = this.value.toUpperCase();
+  // Only auto-insert hyphen when value is exactly "SC" (no hyphen yet)
+  if (val === "SC") {
+    this.value = "SC-";
+  }
 });
 
 // Middle initial
@@ -723,39 +732,51 @@ function downloadPDF(){
 
   const sorted = [...records].sort((a,b)=>a.familyName.localeCompare(b.familyName));
   const now = new Date();
-  const dateStr = now.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+  const cellStyle = "height:5.6mm;padding:0 3px;border:1px solid #000;vertical-align:middle;word-break:break-word;overflow:hidden;";
 
   const rows = sorted.map((r,i) => `
     <tr>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${i+1}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.familyName}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.firstName}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.middleName||''}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.middleInitial||''}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.oscaId}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.birthdate}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.age}</td>
-      <td style="padding:7px 6px;border:1px solid #000;vertical-align:middle">${r.barangay}</td>
+      <td style="${cellStyle}text-align:center;">${i+1}</td>
+      <td style="${cellStyle}">${r.familyName}</td>
+      <td style="${cellStyle}">${r.firstName}</td>
+      <td style="${cellStyle}">${r.middleName||''}</td>
+      <td style="${cellStyle}text-align:center;">${r.middleInitial||''}</td>
+      <td style="${cellStyle}">${r.oscaId}</td>
+      <td style="${cellStyle}text-align:center;">${r.birthdate}</td>
+      <td style="${cellStyle}text-align:center;">${r.age}</td>
+      <td style="${cellStyle}">${r.barangay}</td>
     </tr>`).join('');
 
+  const thStyle = "padding:4px 5px;border:1px solid #000;background:#fff;color:#000;font-weight:bold;text-align:left;";
+
   const html = `
-  <div style="font-family:Calibri,Arial,sans-serif;padding:20px;color:#000;font-size:10px">
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:12px;font-weight:700;letter-spacing:-0.3px">NOT LISTED SENIOR CITIZENS</div>
-      <div style="font-size:10px;margin-top:4px">${dateStr}</div>
+  <div style="font-family:Calibri,Arial,sans-serif;padding:12.7mm;color:#000;font-size:10pt;background:#fff;">
+    <div style="text-align:center;margin-bottom:12px;">
+      <div style="font-size:12pt;font-weight:bold;">NOT LISTED SENIOR CITIZENS</div>
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:10px;color:#000">
+    <table style="width:100%;border-collapse:collapse;font-size:10pt;color:#000;table-layout:fixed;">
+      <colgroup>
+        <col style="width:5%">
+        <col style="width:14%">
+        <col style="width:13%">
+        <col style="width:13%">
+        <col style="width:5%">
+        <col style="width:15%">
+        <col style="width:12%">
+        <col style="width:5%">
+        <col style="width:18%">
+      </colgroup>
       <thead>
         <tr>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">#</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">Family Name</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">First Name</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">Middle Name</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">M.I.</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">OSCA ID No.</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">Birthdate</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">Age</th>
-          <th style="padding:7px 6px;text-align:left;border:1px solid #000">Barangay</th>
+          <th style="${thStyle}text-align:center;">NO.</th>
+          <th style="${thStyle}">Family Name</th>
+          <th style="${thStyle}">First Name</th>
+          <th style="${thStyle}">Middle Name</th>
+          <th style="${thStyle}text-align:center;">M.I.</th>
+          <th style="${thStyle}">OSCA ID No.</th>
+          <th style="${thStyle}text-align:center;">Birthdate</th>
+          <th style="${thStyle}text-align:center;">Age</th>
+          <th style="${thStyle}">Barangay</th>
         </tr>
       </thead>
       <tbody>
@@ -769,16 +790,16 @@ function downloadPDF(){
   document.body.appendChild(container);
 
   html2pdf().set({
-    margin:       [10, 10, 10, 10],
-    filename:     `OSCA_Registry_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.pdf`,
-    image:        { type:'jpeg', quality:0.98 },
-    html2canvas:  { scale:2, useCORS:true },
-    jsPDF:        { unit:'mm', format:'a4', orientation:'landscape' }
+    margin:       0,
+    filename:     `NOT_LISTED.pdf`,
+    image:        { type:'jpeg', quality:1 },
+    html2canvas:  { scale:2, useCORS:true, backgroundColor:'#ffffff' },
+    jsPDF:        { unit:'mm', format:'a4', orientation:'portrait' }
   }).from(container).save().then(()=>{
     document.body.removeChild(container);
   });
 }
-
+  
 displayRecords();
 </script>
 
